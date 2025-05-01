@@ -272,4 +272,11 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+
+  <Target Name="AfterBuild" Condition="'$(Configuration)'=='Debug'">
+    <ItemGroup>
+        <NETHOST Include="runtimes\win-$(LibrariesArchitecture)\native\nethost.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(NETHOST)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>  
 </Project>
