@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="runtimes">
+      <UniqueIdentifier>{6b5a94c7-7950-449e-98d7-5af9b6cb76e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtimes\win-x64">
+      <UniqueIdentifier>{60ec1ae5-278a-416f-87ee-a6c3d4a089f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtimes\win-x64\native">
+      <UniqueIdentifier>{6536b38a-18ad-427f-be5a-54fbf17c0aa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtimes\win-x86">
+      <UniqueIdentifier>{f07c9414-154d-4afe-a430-f8dcb61381f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtimes\win-arm64">
+      <UniqueIdentifier>{aa495e0b-e311-4020-a1b9-adfd98bc1178}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtimes\win-arm64\native">
+      <UniqueIdentifier>{9c8c82d4-f0fc-440d-ad1e-40410c992a79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtimes\win-x86\native">
+      <UniqueIdentifier>{516733ca-3ec8-4509-9b28-fa5e710ef2b8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinTrace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="runtimes\win-x64\native\coreclr_delegates.h">
+      <Filter>runtimes\win-x64\native</Filter>
+    </ClInclude>
+    <ClInclude Include="runtimes\win-x64\native\hostfxr.h">
+      <Filter>runtimes\win-x64\native</Filter>
+    </ClInclude>
+    <ClInclude Include="runtimes\win-x64\native\nethost.h">
+      <Filter>runtimes\win-x64\native</Filter>
+    </ClInclude>
+    <ClInclude Include="runtimes\win-arm64\native\coreclr_delegates.h">
+      <Filter>runtimes\win-arm64\native</Filter>
+    </ClInclude>
+    <ClInclude Include="runtimes\win-arm64\native\hostfxr.h">
+      <Filter>runtimes\win-arm64\native</Filter>
+    </ClInclude>
+    <ClInclude Include="runtimes\win-arm64\native\nethost.h">
+      <Filter>runtimes\win-arm64\native</Filter>
+    </ClInclude>
+    <ClInclude Include="runtimes\win-x86\native\coreclr_delegates.h">
+      <Filter>runtimes\win-x86\native</Filter>
+    </ClInclude>
+    <ClInclude Include="runtimes\win-x86\native\hostfxr.h">
+      <Filter>runtimes\win-x86\native</Filter>
+    </ClInclude>
+    <ClInclude Include="runtimes\win-x86\native\nethost.h">
+      <Filter>runtimes\win-x86\native</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinTrace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AotNetComHost.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="vcpkg.json" />
+    <None Include="vcpkg-configuration.json" />
+    <None Include="runtimes\win-x64\native\libnethost.lib">
+      <Filter>runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="runtimes\win-x64\native\libnethost.pdb">
+      <Filter>runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="runtimes\win-x64\native\nethost.dll">
+      <Filter>runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="runtimes\win-x64\native\nethost.lib">
+      <Filter>runtimes\win-x64\native</Filter>
+    </None>
+    <None Include="runtimes\win-arm64\native\libnethost.lib">
+      <Filter>runtimes\win-arm64\native</Filter>
+    </None>
+    <None Include="runtimes\win-x86\native\libnethost.pdb">
+      <Filter>runtimes\win-arm64\native</Filter>
+    </None>
+    <None Include="runtimes\win-x86\native\nethost.dll">
+      <Filter>runtimes\win-arm64\native</Filter>
+    </None>
+    <None Include="runtimes\win-arm64\native\nethost.lib">
+      <Filter>runtimes\win-arm64\native</Filter>
+    </None>
+    <None Include="runtimes\win-arm64\native\libnethost.pdb">
+      <Filter>runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="runtimes\win-arm64\native\nethost.dll">
+      <Filter>runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="runtimes\win-x86\native\nethost.lib">
+      <Filter>runtimes\win-x86\native</Filter>
+    </None>
+    <None Include="runtimes\win-x86\native\libnethost.lib">
+      <Filter>runtimes\win-x86\native</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AotNetComHost.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
