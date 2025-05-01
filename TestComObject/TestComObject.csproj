@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<PublishAot>true</PublishAot>
+		<IsAotCompatible>true</IsAotCompatible>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Platforms>ARM64;x64;x86</Platforms>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Using Include="System" />
+		<Using Include="System.ComponentModel" />
+		<Using Include="System.Runtime.InteropServices" />
+		<Using Include="System.Threading" />
+	</ItemGroup>
+
+	<Target Name="AotNetComHost" AfterTargets="Build">
+		<ItemGroup>
+			<AotNetComHost Condition="'$(Platform)'=='x86'" Include="$(SolutionDir)\$(Configuration)\*.dll" />
+			<AotNetComHost Condition="'$(Platform)'!='x86'" Include="$(SolutionDir)$(Platform)\$(Configuration)\*.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(AotNetComHost)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+	</Target>
+
+</Project>

@@ -1,0 +1,18 @@
+﻿namespace TestComObject;
+
+public static class ComHosting
+{
+    [UnmanagedCallersOnly(EntryPoint = nameof(DllRegisterServer))]
+    public static uint DllRegisterServer()
+    {
+        EventProvider.Default.Write();
+        return 0;
+    }
+
+    [UnmanagedCallersOnly(EntryPoint = nameof(DllUnregisterServer))]
+    public static uint DllUnregisterServer()
+    {
+        EventProvider.Default.Write();
+        return 0;
+    }
+}

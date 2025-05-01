@@ -2,6 +2,8 @@
 
 // we don't use OutputDebugString because it's 100% crap, truncating, slow, etc.
 // use WpfTraceSpy https://github.com/smourier/TraceSpy to see these traces (configure an ETW Provider with guid set to 964d4572-adb9-4f3a-8170-fcbecec27467)
+
+// same value as in EventProvider.cpp
 static GUID GUID_WinTraceProvider = { 0x964d4572,0xadb9,0x4f3a,{0x81,0x70,0xfc,0xbe,0xce,0xc2,0x74,0x67} };
 
 REGHANDLE _traceHandle = 0;
