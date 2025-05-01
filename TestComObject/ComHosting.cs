@@ -2,6 +2,8 @@
 
 public static class ComHosting
 {
+    public delegate uint DllRegisterServerDelegate();
+
     [UnmanagedCallersOnly(EntryPoint = nameof(DllRegisterServer))]
     public static uint DllRegisterServer()
     {

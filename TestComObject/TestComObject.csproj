@@ -7,6 +7,7 @@
 		<IsAotCompatible>true</IsAotCompatible>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>ARM64;x64;x86</Platforms>
+		<EnableDynamicLoading>true</EnableDynamicLoading>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -22,6 +23,7 @@
 			<AotNetComHost Condition="'$(Platform)'!='x86'" Include="$(SolutionDir)$(Platform)\$(Configuration)\*.dll" />
 		</ItemGroup>
 		<Copy SourceFiles="@(AotNetComHost)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+		<Move ContinueOnError="false" SourceFiles="$(OutDir)\AotNetComHost.dll" DestinationFiles="$(OutDir)\$(AssemblyName).comthunk.dll" />
 	</Target>
 
 </Project>

@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#pragma comment(lib, "pathcch.lib")
+
 HMODULE _hModule = nullptr;
 HRESULT _loaded = 0xFFFFFFFF;
 hostfxr_initialize_for_dotnet_command_line_fn init_for_cmd_line_fptr = nullptr;
@@ -7,7 +9,18 @@ hostfxr_initialize_for_runtime_config_fn init_for_config_fptr = nullptr;
 hostfxr_get_runtime_delegate_fn get_delegate_fptr = nullptr;
 hostfxr_run_app_fn run_app_fptr = nullptr;
 hostfxr_close_fn close_fptr = nullptr;
-component_entry_point_fn _showWindowFn = nullptr;
+
+typedef HRESULT (CORECLR_DELEGATE_CALLTYPE* dll_register_server_fn)();
+typedef HRESULT (CORECLR_DELEGATE_CALLTYPE* dll_unregister_server_fn)();
+typedef HRESULT (CORECLR_DELEGATE_CALLTYPE* dll_install_fn)(BOOL bInstall, LPCWSTR pszCmdLine);
+typedef HRESULT (CORECLR_DELEGATE_CALLTYPE* dll_can_unload_now_fn)();
+typedef HRESULT (CORECLR_DELEGATE_CALLTYPE* dll_get_class_object_fn)(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ LPVOID FAR* ppv);
+
+dll_register_server_fn dll_register_server;
+dll_unregister_server_fn dll_unregister_server;
+dll_install_fn dll_install;
+dll_can_unload_now_fn dll_can_unload_now;
+dll_get_class_object_fn dll_get_class_object;
 
 struct registry_traits
 {
@@ -35,13 +48,11 @@ static HRESULT load_hostfxr()
 {
 	char_t buffer[2048];
 	auto buffer_size = sizeof(buffer) / sizeof(char_t);
-	auto hr = get_hostfxr_path(buffer, &buffer_size, nullptr);
-	if (FAILED(hr))
-		return hr;
+	RETURN_IF_FAILED((HRESULT)get_hostfxr_path(buffer, &buffer_size, nullptr));
 
 	auto lib = LoadLibrary(buffer);
 	if (!lib)
-		return HRESULT_FROM_WIN32(GetLastError());
+		RETURN_IF_FAILED((HRESULT)CoreHostLibLoadFailure);
 
 	init_for_config_fptr = (hostfxr_initialize_for_runtime_config_fn)GetProcAddress(lib, "hostfxr_initialize_for_runtime_config");
 	get_delegate_fptr = (hostfxr_get_runtime_delegate_fn)GetProcAddress(lib, "hostfxr_get_runtime_delegate");
@@ -50,8 +61,85 @@ static HRESULT load_hostfxr()
 	if (!init_for_config_fptr || !get_delegate_fptr || !close_fptr)
 	{
 		FreeLibrary(lib);
-		return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+		RETURN_IF_FAILED((HRESULT)CoreHostLibMissingFailure);
 	}
+
+	auto currentDirPath = wil::GetModuleFileNameW(_hModule);
+	WinTrace(L"currentDirPath: '%s'", currentDirPath.get());
+
+	// this AotNetComHost.dll file name (after being renamed) can have any extension, it just must be named "MyNetDll.whatever.etc.whatever.dll"
+	// and in this case we'll load "MyNetDll.dll" and "MyNetDll.runtimeconfig.json"
+	auto fileName = wil::find_last_path_segment(currentDirPath.get());
+	auto tok = wcschr(fileName, L'.');
+	if (!tok)
+	{
+		FreeLibrary(lib);
+		RETURN_IF_FAILED(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
+	}
+
+	*(LPWSTR)tok = 0;
+	WinTrace(L"fileName: '%s'", fileName);
+
+	PathCchRemoveFileSpec(currentDirPath.get(), lstrlen(currentDirPath.get()));
+	WinTrace(L"currentDirPath: '%s'", currentDirPath.get());
+
+	auto rtName = std::wstring(fileName);
+	rtName += L".runtimeconfig.json";
+
+	wil::unique_cotaskmem_string rtPath;
+	PathAllocCombine(currentDirPath.get(), rtName.c_str(), 0, &rtPath);
+
+	WinTrace(L"rtPath: '%s'", rtPath.get());
+
+	hostfxr_handle cxt = nullptr;
+	auto rc = init_for_config_fptr(rtPath.get(), nullptr, &cxt);
+	if (rc != 0 || !cxt)
+	{
+		close_fptr(cxt);
+		FreeLibrary(lib);
+		RETURN_IF_FAILED((HRESULT)rc);
+	}
+
+	load_assembly_fn load_assembly = nullptr;
+	rc = get_delegate_fptr(cxt, hdt_load_assembly, (void**)&load_assembly);
+	if (rc != 0 || !cxt)
+	{
+		close_fptr(cxt);
+		FreeLibrary(lib);
+		RETURN_IF_FAILED((HRESULT)rc);
+	}
+
+	get_function_pointer_fn get_function_pointer = nullptr;
+	rc = get_delegate_fptr(cxt, hdt_get_function_pointer, (void**)&get_function_pointer);
+	if (rc != 0 || !cxt)
+	{
+		close_fptr(cxt);
+		FreeLibrary(lib);
+		RETURN_IF_FAILED((HRESULT)rc);
+	}
+	close_fptr(cxt);
+
+	auto dllName = std::wstring(fileName);
+	dllName += L".dll";
+
+	wil::unique_cotaskmem_string dllPath;
+	PathAllocCombine(currentDirPath.get(), dllName.c_str(), 0, &dllPath);
+
+	auto typeName = std::wstring(fileName);
+	typeName += L".ComHosting, ";
+	typeName += fileName;
+
+	WinTrace(L"typeName: '%s'", typeName.c_str());
+	WinTrace(L"dllPath: '%s'", dllPath.get());
+	RETURN_IF_FAILED((HRESULT)load_assembly(dllPath.get(), nullptr, nullptr));
+
+	RETURN_IF_FAILED((HRESULT)get_function_pointer(
+		typeName.c_str(),
+		L"DllRegisterServer",
+		L"TestComObject.ComHosting.DllRegisterServerDelegate, TestComObject",
+		nullptr,
+		nullptr,
+		(void**)&dll_register_server));
 
 	return S_OK;
 }
@@ -73,7 +161,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 		_hModule = hModule;
 		WinTraceRegister();
 		WinTrace(L"DllMain DLL_PROCESS_ATTACH '%s'", GetCommandLine());
-		DisableThreadLibraryCalls(hModule);
+		//DisableThreadLibraryCalls(hModule);
 
 		wil::SetResultLoggingCallback([](wil::FailureInfo const& failure) noexcept
 			{
