@@ -17,7 +17,6 @@ public sealed partial class EventProvider : IDisposable
             throw new Win32Exception(hr);
     }
 
-    public void Write(string text, byte level = 0, long keywords = 0) => EventWriteString(_handle, level, keywords, text);
     public void Write(string? text = null, [CallerMemberName] string? methodName = null) => EventWriteString(_handle, 0, 0, methodName + ": " + text ?? string.Empty);
 
     public void Dispose()

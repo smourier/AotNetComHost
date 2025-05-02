@@ -22,6 +22,10 @@ dll_install_fn dll_install;
 dll_can_unload_now_fn dll_can_unload_now;
 dll_get_class_object_fn dll_get_class_object;
 
+// for communication between this and the .NET dll
+typedef HRESULT(CORECLR_DELEGATE_CALLTYPE* dll_thunk_init_fn)(LPCWSTR dllPath);
+dll_thunk_init_fn dll_thunk_init;
+
 struct registry_traits
 {
 	using type = HKEY;
@@ -177,6 +181,20 @@ static HRESULT load_hostfxr()
 		nullptr,
 		nullptr,
 		(void**)&dll_install);
+
+	// DllThunkInit is optional
+	(HRESULT)get_function_pointer(
+		typeName.c_str(),
+		L"DllThunkInit",
+		UNMANAGEDCALLERSONLY_METHOD,
+		nullptr,
+		nullptr,
+		(void**)&dll_thunk_init);
+	
+	if (dll_thunk_init)
+	{
+		RETURN_IF_FAILED(dll_thunk_init(wil::GetModuleFileNameW(_hModule).get()));
+	}
 
 	return S_OK;
 }

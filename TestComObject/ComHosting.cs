@@ -42,4 +42,16 @@ public static class ComHosting
         EventProvider.Default.Write();
         return E_NOTIMPL;
     }
+
+#if DEBUG
+    private static string? _thunkDllPath = Environment.ProcessPath + ".TestComObject.dll";
+
+    [UnmanagedCallersOnly(EntryPoint = nameof(DllThunkInit))]
+    public static uint DllThunkInit(nint dllPathPtr)
+    {
+        _thunkDllPath = Marshal.PtrToStringUni(dllPathPtr);
+        EventProvider.Default.Write("DllPath: " + _thunkDllPath);
+        return 0;
+    }
+#endif
 }
