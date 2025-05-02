@@ -75,6 +75,9 @@
     <ClInclude Include="runtimes\win-x86\native\nethost.h">
       <Filter>runtimes\win-x86\native</Filter>
     </ClInclude>
+    <ClInclude Include="error_codes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

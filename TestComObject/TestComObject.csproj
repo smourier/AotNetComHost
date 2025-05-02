@@ -8,6 +8,9 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>ARM64;x64;x86</Platforms>
 		<EnableDynamicLoading>true</EnableDynamicLoading>
+		
+		<!-- https://github.com/dotnet/runtime/blob/main/docs/workflow/trimming/feature-switches.md -->
+		<_EnableConsumingManagedCodeFromNativeHosting>true</_EnableConsumingManagedCodeFromNativeHosting>
 	</PropertyGroup>
 
 	<ItemGroup>
