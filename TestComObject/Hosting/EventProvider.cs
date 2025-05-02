@@ -1,6 +1,6 @@
-﻿namespace TestComObject;
+﻿namespace TestComObject.Hosting;
 
-public sealed partial class EventProvider : IDisposable
+internal sealed partial class EventProvider : IDisposable
 {
     // same value as in WinTrace.cpp
     public static Guid DefaultGuid { get; set; } = new("964d4572-adb9-4f3a-8170-fcbecec27467");

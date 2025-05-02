@@ -15,12 +15,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Using Include="TestComObject" />
+		<Using Include="TestComObject.Hosting" />
+		<Using Include="TestComObject.Interop" />
 		<Using Include="System" />
 		<Using Include="System.ComponentModel" />
 		<Using Include="System.Diagnostics.CodeAnalysis" />
 		<Using Include="System.Reflection" />
 		<Using Include="System.Runtime.CompilerServices" />
 		<Using Include="System.Runtime.InteropServices" />
+		<Using Include="System.Runtime.InteropServices.Marshalling" />
 		<Using Include="System.Runtime.CompilerServices" />
 		<Using Include="System.Runtime.Versioning" />
 		<Using Include="System.Threading" />
