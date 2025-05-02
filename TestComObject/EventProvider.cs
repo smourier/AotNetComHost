@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace TestComObject;
+﻿namespace TestComObject;
 
 public sealed partial class EventProvider : IDisposable
 {

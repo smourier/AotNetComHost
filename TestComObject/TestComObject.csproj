@@ -4,11 +4,12 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<PublishAot>true</PublishAot>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<IsAotCompatible>true</IsAotCompatible>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>ARM64;x64;x86</Platforms>
 		<EnableDynamicLoading>true</EnableDynamicLoading>
-		
+
 		<!-- https://github.com/dotnet/runtime/blob/main/docs/workflow/trimming/feature-switches.md -->
 		<_EnableConsumingManagedCodeFromNativeHosting>true</_EnableConsumingManagedCodeFromNativeHosting>
 	</PropertyGroup>
@@ -16,7 +17,12 @@
 	<ItemGroup>
 		<Using Include="System" />
 		<Using Include="System.ComponentModel" />
+		<Using Include="System.Diagnostics.CodeAnalysis" />
+		<Using Include="System.Reflection" />
+		<Using Include="System.Runtime.CompilerServices" />
 		<Using Include="System.Runtime.InteropServices" />
+		<Using Include="System.Runtime.CompilerServices" />
+		<Using Include="System.Runtime.Versioning" />
 		<Using Include="System.Threading" />
 	</ItemGroup>
 

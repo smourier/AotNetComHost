@@ -1,5 +1,6 @@
 ﻿namespace TestComObject;
 
+[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Interop code from somewhere else than .NET.")]
 public static class ComHosting
 {
     private const uint E_NOINTERFACE = 0x80004002;
@@ -27,7 +28,7 @@ public static class ComHosting
         return E_NOTIMPL;
     }
 
-    [UnmanagedCallersOnly(EntryPoint = nameof(DllInstall))]
+    [UnmanagedCallersOnly(EntryPoint = nameof(DllGetClassObject))]
     public static uint DllGetClassObject(nint rclsid, nint riid, nint ppv)
     {
         EventProvider.Default.Write();
