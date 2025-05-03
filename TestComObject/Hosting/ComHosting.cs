@@ -26,8 +26,8 @@ public static partial class ComHosting
     [UnmanagedCallersOnly(EntryPoint = nameof(DllCanUnloadNow))]
     public static uint DllCanUnloadNow()
     {
-        EventProvider.Default.Write("Path:" + DllPath);
-        return HRESULT.E_NOTIMPL;
+        EventProvider.Default.Write($"Path:{DllPath}");
+        return HRESULT.S_FALSE;
     }
 
     // retrieves the class object from a DLL object handler or object application.
@@ -37,8 +37,12 @@ public static partial class ComHosting
         var clsid = *(Guid*)rclsid;
         var iid = *(Guid*)riid;
         GetClassObject(clsid, iid, out var obj);
+        if (obj == null)
+            return HRESULT.CLASS_E_CLASSNOTAVAILABLE;
 
-        ppv = _wrappers.GetOrCreateComInterfaceForObject(obj!, CreateComInterfaceFlags.None);
+        var unk = _wrappers.GetOrCreateComInterfaceForObject(obj!, CreateComInterfaceFlags.None);
+        *(nint*)ppv = unk;
+        return HRESULT.S_OK;
     });
 
     // handles installation and setup for a module.
@@ -46,71 +50,74 @@ public static partial class ComHosting
     [UnmanagedCallersOnly(EntryPoint = nameof(DllInstall))]
     public static uint DllInstall(bool install, nint cmdLinePtr) => WrapErrors(() =>
     {
-        EventProvider.Default.Write("Path:" + DllPath);
+        EventProvider.Default.Write($"Path:{DllPath}");
         if (cmdLinePtr != 0)
         {
             var cmdLine = Marshal.PtrToStringUni(cmdLinePtr);
-            EventProvider.Default.Write("CmdLine:" + cmdLine);
+            EventProvider.Default.Write($"CmdLine:{cmdLine}");
             if (string.Equals(cmdLine, "user", StringComparison.OrdinalIgnoreCase))
             {
                 InstallInHkcu = true;
             }
         }
 
-        if (install)
-        {
-            RegisterServer();
-        }
-        else
-        {
-            UnregisterServer();
-        }
+        return install ? RegisterServer() : UnregisterServer();
     });
 
-    private static HRESULT WrapErrors(Action action)
+    private static HRESULT WrapErrors(Func<HRESULT> action)
     {
         try
         {
-            action();
-            return HRESULT.S_OK;
+            return action();
         }
         catch (SecurityException se)
         {
             // transform this one as a well-known access denied
-            EventProvider.Default.Write("Ex:" + se);
+            EventProvider.Default.Write($"Ex:{se}");
             return HRESULT.E_ACCESSDENIED;
         }
         catch (Exception ex)
         {
-            EventProvider.Default.Write("Ex:" + ex);
+            EventProvider.Default.Write($"Ex:{ex}");
             return (uint)ex.HResult;
         }
     }
 
-    private static void RegisterServer()
+    private static HRESULT RegisterServer()
     {
-        EventProvider.Default.Write("Path:" + DllPath);
+        EventProvider.Default.Write($"Path:{DllPath}");
         var root = InstallInHkcu ? Registry.CurrentUser : Registry.LocalMachine;
         foreach (var type in ComTypes)
         {
             RegisterInProcessComObject(root, type, RegistrationDllPath, ThreadingModel);
         }
+        return HRESULT.S_OK;
     }
 
-    private static void UnregisterServer()
+    private static HRESULT UnregisterServer()
     {
-        EventProvider.Default.Write("Path:" + DllPath);
+        EventProvider.Default.Write($"Path:{DllPath}");
         var root = InstallInHkcu ? Registry.CurrentUser : Registry.LocalMachine;
         foreach (var type in ComTypes)
         {
             UnregisterComObject(root, type);
         }
+        return HRESULT.S_OK;
     }
 
-    private static void GetClassObject(Guid clsid, Guid iid, out object? ppv)
+    private static HRESULT GetClassObject(Guid clsid, Guid iid, out object? ppv)
     {
         EventProvider.Default.Write($"Path:{DllPath} CLSID:{clsid} IID:{iid}");
+        foreach (var type in ComTypes)
+        {
+            if (clsid == type.GUID && iid == typeof(IClassFactory).GUID)
+            {
+                ppv = new ClassFactory(type);
+                return HRESULT.S_OK;
+            }
+        }
         ppv = null;
+        return HRESULT.E_NOINTERFACE;
     }
 
     public static bool InstallInHkcu { get; set; } = false;
@@ -123,7 +130,7 @@ public static partial class ComHosting
         => DllPath;
 #endif
 
-    private static readonly StrategyBasedComWrappers _wrappers = new();
+    internal static readonly StrategyBasedComWrappers _wrappers = new();
     private const string ClassesRegistryKey = @"Software\Classes";
     private const string ClsidRegistryKey = ClassesRegistryKey + @"\CLSID";
 
@@ -201,7 +208,7 @@ public static partial class ComHosting
     {
         var types = ComTypes;
         _thunkDllPath = Marshal.PtrToStringUni(thunkDllPathPtr);
-        EventProvider.Default.Write("Path:" + DllPath + " ThunkDllPathPtr: " + _thunkDllPath);
+        EventProvider.Default.Write($"Path:{DllPath} ThunkDllPathPtr:{_thunkDllPath}");
         return 0;
     }
 #else

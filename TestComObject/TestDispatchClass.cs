@@ -7,21 +7,27 @@ public partial class TestDispatchClass : IDispatch
 {
     HRESULT IDispatch.GetIDsOfNames(in Guid riid, nint[] rgszNames, uint cNames, uint lcid, int[] rgDispId)
     {
-        throw new NotImplementedException();
+        EventProvider.Default.Write("riid:" + riid + " cNames: " + cNames);
+        return HRESULT.DISP_E_UNKNOWNNAME;
     }
 
     HRESULT IDispatch.GetTypeInfo(uint iTInfo, uint lcid, out nint ppTInfo)
     {
-        throw new NotImplementedException();
+        EventProvider.Default.Write("iTInfo:" + iTInfo + " lcid: " + lcid);
+        ppTInfo = 0;
+        return HRESULT.E_NOINTERFACE;
     }
 
     HRESULT IDispatch.GetTypeInfoCount(out uint pctinfo)
     {
-        throw new NotImplementedException();
+        EventProvider.Default.Write();
+        pctinfo = 0;
+        return HRESULT.S_OK;
     }
 
     HRESULT IDispatch.Invoke(int dispIdMember, in Guid riid, uint lcid, DISPATCH_FLAGS wFlags, in DISPPARAMS pDispParams, nint pVarResult, nint pExcepInfo, nint puArgErr)
     {
-        throw new NotImplementedException();
+        EventProvider.Default.Write("dispIdMember: " + dispIdMember + " riid:" + riid + " v: " + wFlags);
+        return HRESULT.DISP_E_MEMBERNOTFOUND;
     }
 }

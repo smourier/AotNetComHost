@@ -6,11 +6,13 @@ public partial class TestClass : IOleCommandTarget
 {
     HRESULT IOleCommandTarget.Exec(in Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, in VARIANT pvaIn, ref VARIANT pvaOut)
     {
-        throw new NotImplementedException();
+        EventProvider.Default.Write("pguidCmdGroup:" + pguidCmdGroup + " nCmdID: " + nCmdID);
+        return HRESULT.S_OK;
     }
 
     HRESULT IOleCommandTarget.QueryStatus(in Guid pguidCmdGroup, uint cCmds, ref OLECMD prgCmds, ref OLECMDTEXT pCmdText)
     {
-        throw new NotImplementedException();
+        EventProvider.Default.Write("pguidCmdGroup:" + pguidCmdGroup + " cCmds: " + cCmds);
+        return HRESULT.E_NOTIMPL;
     }
 }
