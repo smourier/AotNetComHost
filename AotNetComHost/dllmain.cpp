@@ -132,19 +132,35 @@ static HRESULT load_hostfxr()
 	WinTrace(L"dllPath: '%s'", dllPath.get());
 	RETURN_IF_FAILED((HRESULT)load_assembly(dllPath.get(), nullptr, nullptr));
 
+	// try <assemblyname>.ComHosting, <assemblyname>
 	auto typeName = std::wstring(fileName);
 	typeName += L".ComHosting, ";
 	typeName += fileName;
 
 	WinTrace(L"typeName: '%s'", typeName.c_str());
-	RETURN_IF_FAILED_MSG((HRESULT)get_function_pointer(
+	if (FAILED((HRESULT)get_function_pointer(
 		typeName.c_str(),
 		L"DllRegisterServer",
-		UNMANAGEDCALLERSONLY_METHOD, //L"TestComObject.ComHosting.DllRegisterServerDelegate, TestComObject",
+		UNMANAGEDCALLERSONLY_METHOD,
 		nullptr,
 		nullptr,
-		(void**)&dll_register_server),
-		"DllRegisterServer is not exported.");
+		(void**)&dll_register_server)))
+	{
+		// try <assemblyname>.Hosting.ComHosting, <assemblyname>
+		typeName = std::wstring(fileName);
+		typeName += L".Hosting.ComHosting, ";
+		typeName += fileName;
+
+		WinTrace(L"typeName: '%s'", typeName.c_str());
+		RETURN_IF_FAILED_MSG((HRESULT)get_function_pointer(
+			typeName.c_str(),
+			L"DllRegisterServer",
+			UNMANAGEDCALLERSONLY_METHOD,
+			nullptr,
+			nullptr,
+			(void**)&dll_register_server),
+			"DllRegisterServer is not exported or ComHosting type is not exposed as expected.");
+	}
 
 	RETURN_IF_FAILED_MSG((HRESULT)get_function_pointer(
 		typeName.c_str(),

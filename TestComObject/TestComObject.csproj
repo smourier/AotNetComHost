@@ -11,7 +11,12 @@
 		<EnableDynamicLoading>true</EnableDynamicLoading>
 
 		<!-- https://github.com/dotnet/runtime/blob/main/docs/workflow/trimming/feature-switches.md -->
+		<!-- this is needed for the .NET dll (not AOT published) to be loaded by the native thunk dll -->
+		<!-- specifying this with RuntimeHostConfigurationOption doesn't seem to work -->
 		<_EnableConsumingManagedCodeFromNativeHosting>true</_EnableConsumingManagedCodeFromNativeHosting>
+		
+		<!-- this is needed for AOT trimming to keep ProgId attributes -->
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 	</PropertyGroup>
 
 	<ItemGroup>

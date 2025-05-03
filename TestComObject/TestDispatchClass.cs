@@ -1,7 +1,5 @@
-﻿
-namespace TestComObject;
+﻿namespace TestComObject;
 
-[ComHosted]
 [Guid("be2982f8-a838-497b-88f0-f957f6cf7f87")]
 [ProgId("TestComObject.TestDispatchClass")]
 [GeneratedComClass]
