@@ -1,6 +1,6 @@
 ﻿namespace TestComObject.Interop;
 
-internal partial struct VARIANT
+public partial struct VARIANT
 {
     [StructLayout(LayoutKind.Explicit)]
     public struct AnonymousUnion

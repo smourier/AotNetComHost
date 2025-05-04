@@ -1,6 +1,6 @@
 ﻿namespace TestComObject.Interop;
 
-internal partial struct VARIANT_BOOL(short value) : IEquatable<VARIANT_BOOL>
+public partial struct VARIANT_BOOL(short value) : IEquatable<VARIANT_BOOL>
 {
     public static readonly VARIANT_BOOL Null = new();
 

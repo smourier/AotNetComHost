@@ -1,7 +1,7 @@
 ﻿namespace TestComObject.Interop;
 
 [GeneratedComInterface, Guid("00000001-0000-0000-c000-000000000046")]
-internal partial interface IClassFactory
+public partial interface IClassFactory
 {
     [PreserveSig]
     [return: MarshalAs(UnmanagedType.Error)]

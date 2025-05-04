@@ -1,7 +1,7 @@
 ﻿namespace TestComObject.Hosting;
 
 [GeneratedComClass]
-internal partial class ClassFactory : IClassFactory
+public partial class ClassFactory : IClassFactory
 {
     public ClassFactory(Type type)
     {
@@ -13,9 +13,11 @@ internal partial class ClassFactory : IClassFactory
 
     HRESULT IClassFactory.CreateInstance(nint pUnkOuter, in Guid riid, out nint ppvObject)
     {
-        EventProvider.Default.Write($"pUnkOuter:{pUnkOuter} riid:{riid}");
+        EventProvider.Default.Write($"pUnkOuter:{pUnkOuter} riid:{riid} Type:{Type.FullName}");
         ppvObject = 0;
+        // we should only instantiate classes that are declared in ComHosting.ComTypes
         var obj = Activator.CreateInstance(Type, true);
+#pragma warning restore IL2072 // Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.
         if (obj is null)
             return HRESULT.E_NOINTERFACE;
 

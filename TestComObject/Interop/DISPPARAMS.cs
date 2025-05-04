@@ -1,6 +1,6 @@
 ﻿namespace TestComObject.Interop;
 
-internal partial struct DISPPARAMS
+public partial struct DISPPARAMS
 {
     public nint rgvarg;
     public nint rgdispidNamedArgs;

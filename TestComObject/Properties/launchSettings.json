@@ -3,7 +3,8 @@
     "Profile 1": {
       "commandName": "Executable",
       "executablePath": "c:\\windows\\system32\\cscript.exe",
-      "commandLineArgs": "test.vbs"
+      "commandLineArgs": "test.vbs",
+      "nativeDebugging": true
     }
   }
 }

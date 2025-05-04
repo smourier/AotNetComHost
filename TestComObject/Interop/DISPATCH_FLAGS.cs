@@ -1,7 +1,7 @@
 ﻿namespace TestComObject.Interop;
 
 [Flags]
-internal enum DISPATCH_FLAGS : ushort
+public enum DISPATCH_FLAGS : ushort
 {
     DISPATCH_METHOD = 1,
     DISPATCH_PROPERTYGET = 2,

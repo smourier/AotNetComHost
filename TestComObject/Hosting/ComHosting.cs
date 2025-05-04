@@ -36,12 +36,13 @@ public static partial class ComHosting
     {
         var clsid = *(Guid*)rclsid;
         var iid = *(Guid*)riid;
-        GetClassObject(clsid, iid, out var obj);
-        if (obj == null)
-            return HRESULT.CLASS_E_CLASSNOTAVAILABLE;
+        var hr = GetClassObject(clsid, iid, out var obj);
+        if (hr != HRESULT.S_OK)
+            return hr;
 
         var unk = _wrappers.GetOrCreateComInterfaceForObject(obj!, CreateComInterfaceFlags.None);
         *(nint*)ppv = unk;
+        EventProvider.Default.Write($"unk:{unk}");
         return HRESULT.S_OK;
     });
 
@@ -110,13 +111,16 @@ public static partial class ComHosting
         EventProvider.Default.Write($"Path:{DllPath} CLSID:{clsid} IID:{iid}");
         foreach (var type in ComTypes)
         {
+            EventProvider.Default.Write($"Type:{type.FullName} guid:{type.GUID}");
             if (clsid == type.GUID && iid == typeof(IClassFactory).GUID)
             {
                 ppv = new ClassFactory(type);
+                EventProvider.Default.Write($"ppv:{ppv}");
                 return HRESULT.S_OK;
             }
         }
         ppv = null;
+        EventProvider.Default.Write($"E_NOINTERFACE");
         return HRESULT.E_NOINTERFACE;
     }
 

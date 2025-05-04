@@ -1,7 +1,7 @@
 ﻿namespace TestComObject.Interop;
 
 [GeneratedComInterface, Guid("b722bccb-4e68-101b-a2bc-00aa00404770")]
-internal partial interface IOleCommandTarget
+public partial interface IOleCommandTarget
 {
     [PreserveSig]
     [return: MarshalAs(UnmanagedType.Error)]
