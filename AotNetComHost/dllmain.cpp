@@ -39,9 +39,14 @@ static HRESULT load_hostfxr()
 	auto buffer_size = sizeof(buffer) / sizeof(char_t);
 	RETURN_IF_FAILED((HRESULT)get_hostfxr_path(buffer, &buffer_size, nullptr));
 
+	WinTrace(L"hostfxr path:'%s'", buffer);
+
 	auto lib = LoadLibrary(buffer);
 	if (!lib)
+	{
+		WinTrace(L"cannot load hostfxr");
 		RETURN_IF_FAILED((HRESULT)CoreHostLibLoadFailure);
+	}
 
 	init_for_config_fptr = (hostfxr_initialize_for_runtime_config_fn)GetProcAddress(lib, "hostfxr_initialize_for_runtime_config");
 	get_delegate_fptr = (hostfxr_get_runtime_delegate_fn)GetProcAddress(lib, "hostfxr_get_runtime_delegate");
@@ -49,6 +54,7 @@ static HRESULT load_hostfxr()
 
 	if (!init_for_config_fptr || !get_delegate_fptr || !close_fptr)
 	{
+		WinTrace(L"cannot load proc address");
 		FreeLibrary(lib);
 		RETURN_IF_FAILED((HRESULT)CoreHostLibMissingFailure);
 	}
@@ -81,30 +87,33 @@ static HRESULT load_hostfxr()
 	WinTrace(L"rtPath: '%s'", rtPath.get());
 
 	hostfxr_handle cxt = nullptr;
-	auto rc = init_for_config_fptr(rtPath.get(), nullptr, &cxt);
-	if (rc != 0 || !cxt)
+	auto rc = (HRESULT)init_for_config_fptr(rtPath.get(), nullptr, &cxt);
+	if (FAILED(rc) || !cxt)
 	{
+		WinTrace(L"init_for_config_fptr failed rc:0x%08X", rc);
 		close_fptr(cxt);
 		FreeLibrary(lib);
-		RETURN_IF_FAILED((HRESULT)rc);
+		RETURN_IF_FAILED(rc);
 	}
 
 	load_assembly_fn load_assembly = nullptr;
 	rc = get_delegate_fptr(cxt, hdt_load_assembly, (void**)&load_assembly);
-	if (rc != 0 || !cxt)
+	if (FAILED(rc) || !cxt)
 	{
+		WinTrace(L"get_delegate_fptr(hdt_load_assembly) failed rc:0x%08X", rc);
 		close_fptr(cxt);
 		FreeLibrary(lib);
-		RETURN_IF_FAILED((HRESULT)rc);
+		RETURN_IF_FAILED(rc);
 	}
 
 	get_function_pointer_fn get_function_pointer = nullptr;
 	rc = get_delegate_fptr(cxt, hdt_get_function_pointer, (void**)&get_function_pointer);
-	if (rc != 0 || !cxt)
+	if (FAILED(rc) || !cxt)
 	{
+		WinTrace(L"get_delegate_fptr(hdt_get_function_pointer) failed rc:0x%08X", rc);
 		close_fptr(cxt);
 		FreeLibrary(lib);
-		RETURN_IF_FAILED((HRESULT)rc);
+		RETURN_IF_FAILED(rc);
 	}
 	close_fptr(cxt);
 

@@ -8,6 +8,8 @@
 		<IsAotCompatible>true</IsAotCompatible>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>ARM64;x64;x86</Platforms>
+
+		<!-- this is needed to generate a .runtimeconfig.json file -->
 		<EnableDynamicLoading>true</EnableDynamicLoading>
 
 		<!-- https://github.com/dotnet/runtime/blob/main/docs/workflow/trimming/feature-switches.md -->
