@@ -19,7 +19,7 @@ The *TestComObject* is a test COM object that demonstrated how it works. Key poi
 * `Dispatch.cs` is optional, only used with IDispatch COM objects.
 * `EventProvider.cs` is a tracing tool that is optional (if you remove it, remove all its reference)
 * Make sure you analyze and reproduce `TestComObject.csproj` when writing your own component as there are some subtleties in it.
-* `IDispatch` support is here very limited especially around `VARIANT` types. If you need more you should consult the [DirectNAOT](https://github.com/smourier/DirectNAot) that has great a .NET AOT-compatible VARIANT (and PROPVARIANT) [wrapper class](https://github.com/smourier/DirectNAot/blob/main/DirectN.Extensions/Utilities/Variant.cs).
+* `IDispatch` support is here very limited especially around `VARIANT` types. If you need more you should check the [DirectNAOT](https://github.com/smourier/DirectNAot) project that has great a .NET AOT-compatible VARIANT (and PROPVARIANT) [wrapper class](https://github.com/smourier/DirectNAot/blob/main/DirectN.Extensions/Utilities/Variant.cs).
 
 In DEBUG mode, you can call `regsvr32 TestComObject.comthunk.dll` to register it, `regsvr32 TestComObject.comthunk.dll /u` to unregister it.
 
