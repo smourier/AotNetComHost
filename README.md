@@ -31,6 +31,6 @@ There's a `test.vbs` vbscript file that demonstrates using TestComObject, in REL
     Set server = CreateObject("TestComObject.TestDispatchClass")
     WScript.Echo server.ComputePi() // VBS uses IDispatch interface
 
-PS: Unlike .NET Core COM built-in support (https://github.com/dotnet/runtime/issues/45750), the thunk and ComHosting class support HKCU registration. You can use it like this `regsvr32 TestComObject.comthunk.dll /i:user /n` to register and `regsvr32 TestComObject.comthunk.dll /i:user /n /u`
+PS: Unlike .NET Core COM built-in support (https://github.com/dotnet/runtime/issues/45750), the thunk and ComHosting class support `HKCU` registration so admin rights are not required for registration. You can use it like this `regsvr32 TestComObject.comthunk.dll /i:user /n` to register and `regsvr32 TestComObject.comthunk.dll /i:user /n /u`
 
 
