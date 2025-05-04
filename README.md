@@ -4,7 +4,7 @@ A development-time "thunk" dll tool that enable COM support (registration, etc.)
 *But Why?* Because it's painful and not practical to develop and debug a Native AOT COM Object if you need to constantly publish it as AOT in release mode.
 
 The following schema explains how it can be used:
-![image](https://github.com/user-attachments/assets/0b4bf816-3491-4299-b2fb-12c5e78b2fff)
+![image](https://github.com/user-attachments/assets/a664fb03-ec25-4d8e-a0ca-69814f396d70)
 
 AotNetComHost.dll is *only useful when developping and in DEBUG mode*. Once the .NET dll is published as AOT, you shouldn't need it anymore.
 
