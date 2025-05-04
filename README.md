@@ -6,7 +6,7 @@ A development-time "thunk" dll tool that enable COM support (registration, etc.)
 The following schema explains how it can be used:
 ![image](https://github.com/user-attachments/assets/a664fb03-ec25-4d8e-a0ca-69814f396d70)
 
-AotNetComHost.dll is *only useful when developping and in DEBUG mode*. Once the .NET dll is published as AOT, you shouldn't need it anymore.
+AotNetComHost.dll is *only useful when developping and in DEBUG mode*. Once the .NET dll is published as AOT, you shouldn't need it anymore. However provided C# classes (ComHosting, ClassFactory) in the TestComObject project can still be used as they are AOT-compatible.
 
 To work at development time, AotNetComHost.dll and nethost.dll (provided with .NET Core files, located in this repo for practical use) should be placed aside the .NET dll, and AotNetComHost.dll must be renamed as the .NET dll name, followed by .something.dll, like this for example:
 
