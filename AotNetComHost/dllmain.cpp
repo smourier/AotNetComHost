@@ -26,21 +26,6 @@ dll_get_class_object_fn dll_get_class_object;
 typedef HRESULT(CORECLR_DELEGATE_CALLTYPE* dll_thunk_init_fn)(LPCWSTR dllPath);
 dll_thunk_init_fn dll_thunk_init;
 
-struct registry_traits
-{
-	using type = HKEY;
-
-	static void close(type value) noexcept
-	{
-		WINRT_VERIFY_(ERROR_SUCCESS, RegCloseKey(value));
-	}
-
-	static constexpr type invalid() noexcept
-	{
-		return nullptr;
-	}
-};
-
 const static std::wstring GUID_ToStringW(const GUID& guid)
 {
 	wchar_t name[64];
