@@ -21,9 +21,9 @@ The *TestComObject* is a test COM object that demonstrated how it works. Key poi
 * Make sure you analyze and reproduce `TestComObject.csproj` when writing your own component as there are some subtleties in it.
 * `IDispatch` support is here very limited especially around `VARIANT` types. If you need more you should consult the [DirectNAOT](https://github.com/smourier/DirectNAot) that has great a .NET AOT-compatible VARIANT (and PROPVARIANT) [wrapper class](https://github.com/smourier/DirectNAot/blob/main/DirectN.Extensions/Utilities/Variant.cs).
 
-In DEBUG mode, you can call `regsvr32 TestComObject.comthunk.dll to register it`, `regsvr32 TestComObject.comthunk.dll /u` to unregister it.
+In DEBUG mode, you can call `regsvr32 TestComObject.comthunk.dll` to register it, `regsvr32 TestComObject.comthunk.dll /u` to unregister it.
 
-In RELEASE mode, it's just a regular native (AOT) dll, so `regsvr32 TestComObject.dll to register it`, `regsvr32 TestComObject.dll /u` to unregister it.
+In RELEASE mode, it's just a regular native (AOT) dll, so `regsvr32 TestComObject.dll` to register it, `regsvr32 TestComObject.dll /u` to unregister it.
 
 There's a `test.vbs` vbscript file that demonstrates using TestComObject, in RELEASE or DEBUG, very simply (run it with `cscript.exe test.vbs`in command line):
 
