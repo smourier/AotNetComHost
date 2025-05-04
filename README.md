@@ -16,6 +16,7 @@ The *AotNetComHost* is the thunk dll project. It's pretty generic and can be use
 
 The *TestComObject* is a test COM object that demonstrated how it works. Key points:
 * What you should reuse are the classes in the `Hosting` folder and `IClassFactory.cs`: `ClassFactory.cs` and `ComHosting.cs`.
+* `ComHosting.cs` uses COM objects classes' `Guid` and `Progid` attributes but the exposed COM classes must be declared in `ComHosting.ComTypes` array. `ComVisible` or other .NET COM attributes are unused and irrelevant with AOT because unsupported when built-in marshaling is disabled. Note: to ensure `ProgId` will not be trimmed, your csproj needs the `BuiltInComInteropSupport` property set to `true`.
 * `Dispatch.cs` is optional, only used with IDispatch COM objects.
 * `EventProvider.cs` is a tracing tool that is optional (if you remove it, remove all its reference)
 * Make sure you analyze and reproduce `TestComObject.csproj` when writing your own component as there are some subtleties in it.
