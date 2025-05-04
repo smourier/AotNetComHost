@@ -1,8 +1,4 @@
-﻿using System.IO;
-using System.Security;
-using Microsoft.Win32;
-
-namespace TestComObject.Hosting;
+﻿namespace TestComObject.Hosting;
 
 [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Interop code from somewhere else than .NET.")]
 public static partial class ComHosting
