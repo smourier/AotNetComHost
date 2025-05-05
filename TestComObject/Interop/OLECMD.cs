@@ -1,6 +1,6 @@
 ﻿namespace TestComObject.Interop;
 
-public partial struct OLECMD
+public struct OLECMD
 {
     public uint cmdID;
     public uint cmdf;

@@ -1,10 +1,12 @@
 ﻿namespace TestComObject.Hosting;
 
 // don't add GeneratedComClass, it will break with AOT publish for some reason
+#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable SYSLIB1097 // Add 'GeneratedComClassAttribute' to enable passing objects of this type to COM
 public abstract partial class Dispatch<T>
     : IDispatch where T : new() // this is needed to ensure derived class' parameterless constructor will not be trimmed out with AOT publish
 #pragma warning restore SYSLIB1097 // Add 'GeneratedComClassAttribute' to enable passing objects of this type to COM
+#pragma warning restore IDE0079 // Remove unnecessary suppression
 {
     HRESULT IDispatch.GetIDsOfNames(in Guid riid, nint[] rgszNames, uint cNames, uint lcid, int[] rgDispId)
     {

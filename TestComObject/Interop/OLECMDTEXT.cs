@@ -1,6 +1,6 @@
 ﻿namespace TestComObject.Interop;
 
-public partial struct OLECMDTEXT
+public struct OLECMDTEXT
 {
     public uint cmdtextf;
     public uint cwActual;

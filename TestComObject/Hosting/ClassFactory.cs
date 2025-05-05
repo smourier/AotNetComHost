@@ -16,8 +16,11 @@ public partial class ClassFactory : IClassFactory
         EventProvider.Default.Write($"pUnkOuter:{pUnkOuter} riid:{riid} Type:{Type.FullName}");
         ppvObject = 0;
         // we should only instantiate classes that are declared in ComHosting.ComTypes
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IL2072 // Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.
         var obj = Activator.CreateInstance(Type, true);
 #pragma warning restore IL2072 // Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.
+#pragma warning restore IDE0079 // Remove unnecessary suppression
         if (obj is null)
             return HRESULT.E_NOINTERFACE;
 

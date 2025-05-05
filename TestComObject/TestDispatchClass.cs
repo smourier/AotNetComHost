@@ -5,7 +5,12 @@
 [GeneratedComClass]
 public partial class TestDispatchClass : Dispatch<TestDispatchClass>
 {
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable CA1822 // Mark members as static
+    // we want it to be instanced, of course
     public double ComputePi()
+#pragma warning restore CA1822 // Mark members as static
+#pragma warning restore IDE0079 // Remove unnecessary suppression
     {
         Console.WriteLine("computed!");
         return Math.PI;

@@ -1,9 +1,12 @@
-﻿namespace TestComObject.Hosting;
+﻿// the namespace of this ComHosting class is important, it must be <assembly>.Hosting or <assembly
+// for the AotNetComHost to find it
+namespace TestComObject.Hosting;
 
 [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Interop code from somewhere else than .NET.")]
 public static partial class ComHosting
 {
-    // the list of types that are COM types
+    // TODO: this list represents the COM types you want to expose
+    // it's somehow a moral equivalent to setting ComVisible(true) on them
     public static Type[] ComTypes { get; } =
     [
         typeof(TestClass),
@@ -146,7 +149,7 @@ public static partial class ComHosting
         serverKey.SetValue(null, assemblyPath);
         serverKey.SetValue("ThreadingModel", threadingModel);
 
-        // ProgId is optional
+        // ProgId is optional, make sure BuiltInComInteropSupport property is set to true in csproj to avoid it to be trimmed out during AOT publish
         var att = type.GetCustomAttribute<ProgIdAttribute>();
         if (att != null && !string.IsNullOrWhiteSpace(att.Value))
         {
@@ -170,7 +173,7 @@ public static partial class ComHosting
         using var key = root.OpenSubKey(ClsidRegistryKey, true);
         key?.DeleteSubKeyTree(type.GUID.ToString("B"), false);
 
-        // ProgId is optional
+        // ProgId is optional, make sure BuiltInComInteropSupport property is set to true in csproj to avoid it to be trimmed out during AOT publish
         var att = type.GetCustomAttribute<ProgIdAttribute>();
         if (att != null && !string.IsNullOrWhiteSpace(att.Value))
         {
@@ -182,8 +185,11 @@ public static partial class ComHosting
         EventProvider.Default.Write($"Unregistered {type.FullName}.");
     }
 
-    private static RegistryKey EnsureWritableSubKey(RegistryKey root, string name)
+    public static RegistryKey EnsureWritableSubKey(RegistryKey root, string name)
     {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(name);
+
         var key = root.OpenSubKey(name, true);
         if (key != null)
             return key;
@@ -223,7 +229,7 @@ public static partial class ComHosting
 
         var moduleName = stackalloc char[260];
         if (GetModuleFileNameW(module, moduleName, 260) == 0)
-            throw new Win32Exception(Marshal.GetLastWin32Error());
+            throw new Win32Exception(Marshal.GetLastPInvokeError());
 
         return new string(moduleName);
     }

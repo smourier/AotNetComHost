@@ -1,7 +1,6 @@
 ﻿namespace TestComObject.Interop;
 
-// https://learn.microsoft.com/office/client-developer/outlook/mapi/hresult
-public partial struct HRESULT(uint value) : IEquatable<HRESULT>
+public struct HRESULT(uint value) : IEquatable<HRESULT>
 {
     public static readonly HRESULT S_OK = new();
     public static readonly HRESULT S_FALSE = new(0x00000001);
