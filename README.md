@@ -1,5 +1,5 @@
 # AotNetComHost
-A development-time "thunk" dll tool that enable COM support (registration, etc.) for not-yet published .NET AOT COM objects.
+A development-time "thunk" dll tool that enable COM support (registration, etc.) for not-yet published .NET AOT COM in-process objects.
 
 *But Why?* Because it's painful and not practical to develop and debug a Native AOT COM Object if you need to constantly publish it as AOT in release mode.
 
