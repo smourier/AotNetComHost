@@ -3,6 +3,8 @@ A development-time "thunk" dll tool that enable COM support (registration, etc.)
 
 *But Why?* Because it's painful and not practical to develop and debug a Native AOT COM Object if you need to constantly publish it as AOT in release mode.
 
+This [VCamNetSample](https://github.com/smourier/VCamNetSample) project demonstrates how to use the AotNetComHost binaries to show a virtual camera on Windows 11 (requires a COM object).
+
 The following schema explains how it can be used:
 ![image](https://github.com/user-attachments/assets/a664fb03-ec25-4d8e-a0ca-69814f396d70)
 
