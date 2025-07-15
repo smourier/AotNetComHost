@@ -18,6 +18,7 @@
 		<_EnableConsumingManagedCodeFromNativeHosting>true</_EnableConsumingManagedCodeFromNativeHosting>
 
 		<!-- this is needed for AOT trimming to keep ProgId attributes -->
+		<!-- https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trimming-options#framework-features-disabled-when-trimming -->
 		<!-- https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/ILLink/ILLink.LinkAttributes.Shared.xml -->
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 	</PropertyGroup>
