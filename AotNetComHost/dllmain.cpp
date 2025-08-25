@@ -59,20 +59,27 @@ static HRESULT load_hostfxr()
 		RETURN_IF_FAILED((HRESULT)CoreHostLibMissingFailure);
 	}
 
+	// this dll's current folder path
 	auto currentDirPath = wil::GetModuleFileNameW(_hModule);
+
+	// this dll's current file path
+	auto moduleFileName = wil::make_cotaskmem_string(currentDirPath.get());
+	PathCchRemoveFileSpec(currentDirPath.get(), lstrlen(currentDirPath.get()));
+	WinTrace(L"moduleFileName: '%s'", moduleFileName.get());
 	WinTrace(L"currentDirPath: '%s'", currentDirPath.get());
 
+	// the .runtimeconfig.json file path
 	std::wstring rtName;
 
 	// this AotNetComHost.dll file name (after being renamed) can have any name, like "MyNetDll.whatever.etc.whatever.dll"
 	// and in this case we'll try to find the closest "MyNetDll.something.runtimeconfig.json" in the same folder
 
 	auto offset = 0;
-	PCWSTR fileName;
+	PCWSTR dotNetFileName; // the dotnet assembly name without extension
 	do
 	{
-		fileName = wil::find_last_path_segment(currentDirPath.get());
-		auto tok = wcschr(fileName + offset, L'.');
+		dotNetFileName = wil::find_last_path_segment(moduleFileName.get());
+		auto tok = wcschr(dotNetFileName + offset, L'.');
 		if (!tok)
 		{
 			FreeLibrary(lib);
@@ -81,9 +88,13 @@ static HRESULT load_hostfxr()
 
 		*(LPWSTR)tok = 0;
 
-		auto config = std::wstring(fileName);
+		auto config = std::wstring(dotNetFileName);
 		config += L".runtimeconfig.json";
-		auto atts = GetFileAttributesW(config.c_str());
+
+		wil::unique_cotaskmem_string configPath;
+		PathAllocCombine(currentDirPath.get(), config.c_str(), 0, &configPath);
+
+		auto atts = GetFileAttributesW(configPath.get());
 		if (atts != INVALID_FILE_ATTRIBUTES && !(atts & FILE_ATTRIBUTE_DIRECTORY))
 		{
 			rtName = config;
@@ -91,13 +102,9 @@ static HRESULT load_hostfxr()
 		}
 
 		*(LPWSTR)tok = L'.';
-		offset = (int)(tok - fileName) + 1;
+		offset = (int)(tok - dotNetFileName) + 1;
 
 	} while (true);
-
-
-	PathCchRemoveFileSpec(currentDirPath.get(), lstrlen(currentDirPath.get()));
-	WinTrace(L"currentDirPath: '%s'", currentDirPath.get());
 
 	wil::unique_cotaskmem_string rtPath;
 	PathAllocCombine(currentDirPath.get(), rtName.c_str(), 0, &rtPath);
@@ -138,7 +145,7 @@ static HRESULT load_hostfxr()
 	}
 	close_fptr(cxt);
 
-	auto dllName = std::wstring(fileName);
+	auto dllName = std::wstring(dotNetFileName);
 	dllName += L".dll";
 
 	wil::unique_cotaskmem_string dllPath;
@@ -148,9 +155,9 @@ static HRESULT load_hostfxr()
 	RETURN_IF_FAILED((HRESULT)load_assembly(dllPath.get(), nullptr, nullptr));
 
 	// try <assemblyname>.ComHosting, <assemblyname>
-	auto typeName = std::wstring(fileName);
+	auto typeName = std::wstring(dotNetFileName);
 	typeName += L".ComHosting, ";
-	typeName += fileName;
+	typeName += dotNetFileName;
 
 	WinTrace(L"typeName: '%s'", typeName.c_str());
 	if (FAILED((HRESULT)get_function_pointer(
@@ -162,9 +169,9 @@ static HRESULT load_hostfxr()
 		(void**)&dll_register_server)))
 	{
 		// try <assemblyname>.Hosting.ComHosting, <assemblyname>
-		typeName = std::wstring(fileName);
+		typeName = std::wstring(dotNetFileName);
 		typeName += L".Hosting.ComHosting, ";
-		typeName += fileName;
+		typeName += dotNetFileName;
 
 		WinTrace(L"typeName: '%s'", typeName.c_str());
 		RETURN_IF_FAILED_MSG((HRESULT)get_function_pointer(
