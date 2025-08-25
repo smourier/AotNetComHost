@@ -62,24 +62,42 @@ static HRESULT load_hostfxr()
 	auto currentDirPath = wil::GetModuleFileNameW(_hModule);
 	WinTrace(L"currentDirPath: '%s'", currentDirPath.get());
 
-	// this AotNetComHost.dll file name (after being renamed) can have any extension, it just must be named "MyNetDll.whatever.etc.whatever.dll"
-	// and in this case we'll load "MyNetDll.dll" and "MyNetDll.runtimeconfig.json"
-	auto fileName = wil::find_last_path_segment(currentDirPath.get());
-	auto tok = wcschr(fileName, L'.');
-	if (!tok)
-	{
-		FreeLibrary(lib);
-		RETURN_IF_FAILED(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
-	}
+	std::wstring rtName;
 
-	*(LPWSTR)tok = 0;
-	WinTrace(L"fileName: '%s'", fileName);
+	// this AotNetComHost.dll file name (after being renamed) can have any name, like "MyNetDll.whatever.etc.whatever.dll"
+	// and in this case we'll try to find the closest "MyNetDll.something.runtimeconfig.json" in the same folder
+
+	auto offset = 0;
+	PCWSTR fileName;
+	do
+	{
+		fileName = wil::find_last_path_segment(currentDirPath.get());
+		auto tok = wcschr(fileName + offset, L'.');
+		if (!tok)
+		{
+			FreeLibrary(lib);
+			RETURN_IF_FAILED(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
+		}
+
+		*(LPWSTR)tok = 0;
+
+		auto config = std::wstring(fileName);
+		config += L".runtimeconfig.json";
+		auto atts = GetFileAttributesW(config.c_str());
+		if (atts != INVALID_FILE_ATTRIBUTES && !(atts & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			rtName = config;
+			break;
+		}
+
+		*(LPWSTR)tok = L'.';
+		offset = (int)(tok - fileName) + 1;
+
+	} while (true);
+
 
 	PathCchRemoveFileSpec(currentDirPath.get(), lstrlen(currentDirPath.get()));
 	WinTrace(L"currentDirPath: '%s'", currentDirPath.get());
-
-	auto rtName = std::wstring(fileName);
-	rtName += L".runtimeconfig.json";
 
 	wil::unique_cotaskmem_string rtPath;
 	PathAllocCombine(currentDirPath.get(), rtName.c_str(), 0, &rtPath);
@@ -91,7 +109,10 @@ static HRESULT load_hostfxr()
 	if (FAILED(rc) || !cxt)
 	{
 		WinTrace(L"init_for_config_fptr failed rc:0x%08X", rc);
-		close_fptr(cxt);
+		if (cxt)
+		{
+			close_fptr(cxt);
+		}
 		FreeLibrary(lib);
 		RETURN_IF_FAILED(rc);
 	}
