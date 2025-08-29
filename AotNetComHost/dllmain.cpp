@@ -310,7 +310,7 @@ STDAPI DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ LPVOID
 	RETURN_HR_IF_NULL(E_POINTER, ppv);
 	*ppv = nullptr;
 	RETURN_IF_FAILED(ensure_load_hostfxr());
-	RETURN_IF_FAILED(dll_get_class_object(rclsid, riid, ppv));
+	RETURN_IF_FAILED_MSG(dll_get_class_object(rclsid, riid, ppv), "DllGetClassObject '%s' rclsid:%s riid:%s", exePath.c_str(), GUID_ToStringW(rclsid).c_str(), GUID_ToStringW(riid).c_str());
 	return S_OK;
 }
 
