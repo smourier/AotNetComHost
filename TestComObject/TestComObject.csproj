@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<PublishAot>true</PublishAot>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -40,6 +40,12 @@
 		<Using Include="System.Runtime.Versioning" />
 		<Using Include="System.Security" />
 		<Using Include="System.Threading" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="test.vbs">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 	<Target Name="AotNetComHost" AfterTargets="Build">

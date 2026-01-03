@@ -13,36 +13,10 @@
 
 #define NETHOST_USE_AS_STATIC
 
-#if _WIN64
-#if _M_ARM64 
-#include "runtimes\win-arm64\native\hostfxr.h"
-#include "runtimes\win-arm64\native\coreclr_delegates.h"
-#include "runtimes\win-arm64\native\nethost.h"
-#if _DEBUG
-#pragma comment(lib, "runtimes\\win-arm64\\native\\nethost.lib")
-#else
-#pragma comment(lib, "runtimes\\win-arm64\\native\\libnethost.lib")
-#endif
-#else
-#include "runtimes\win-x64\native\hostfxr.h"
-#include "runtimes\win-x64\native\coreclr_delegates.h"
-#include "runtimes\win-x64\native\nethost.h"
-#if _DEBUG
-#pragma comment(lib, "runtimes\\win-x64\\native\\nethost.lib")
-#else
-#pragma comment(lib, "runtimes\\win-x64\\native\\libnethost.lib")
-#endif
-#endif // _M_ARM64
-#else
-#include "runtimes\win-x86\native\hostfxr.h"
-#include "runtimes\win-x86\native\coreclr_delegates.h"
-#include "runtimes\win-x86\native\nethost.h"
-#if _DEBUG
-#pragma comment(lib, "runtimes\\win-x86\\native\\nethost.lib")
-#else
-#pragma comment(lib, "runtimes\\win-x86\\native\\libnethost.lib")
-#endif
-#endif // _WIN64
+#include "hostfxr.h"
+#include "coreclr_delegates.h"
+#include "nethost.h"
+#pragma comment(lib, "nethost.lib")
 
 // WIL (from vcpkg)
 #include "wil\result.h"

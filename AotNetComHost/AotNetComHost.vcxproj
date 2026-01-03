@@ -50,7 +50,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
@@ -62,7 +62,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -231,15 +231,6 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="runtimes\win-arm64\native\coreclr_delegates.h" />
-    <ClInclude Include="runtimes\win-arm64\native\hostfxr.h" />
-    <ClInclude Include="runtimes\win-arm64\native\nethost.h" />
-    <ClInclude Include="runtimes\win-x64\native\coreclr_delegates.h" />
-    <ClInclude Include="runtimes\win-x64\native\hostfxr.h" />
-    <ClInclude Include="runtimes\win-x64\native\nethost.h" />
-    <ClInclude Include="runtimes\win-x86\native\coreclr_delegates.h" />
-    <ClInclude Include="runtimes\win-x86\native\hostfxr.h" />
-    <ClInclude Include="runtimes\win-x86\native\nethost.h" />
     <ClInclude Include="WinTrace.h" />
   </ItemGroup>
   <ItemGroup>
@@ -256,33 +247,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="AotNetComHost.def" />
-    <None Include="runtimes\win-arm64\native\libnethost.pdb" />
-    <None Include="runtimes\win-arm64\native\nethost.dll" />
-    <None Include="runtimes\win-x64\native\libnethost.pdb" />
-    <None Include="runtimes\win-x64\native\nethost.dll" />
-    <None Include="runtimes\win-x86\native\libnethost.pdb" />
-    <None Include="runtimes\win-x86\native\nethost.dll" />
     <None Include="vcpkg-configuration.json" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AotNetComHost.rc" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="runtimes\win-arm64\native\libnethost.lib" />
-    <None Include="runtimes\win-arm64\native\nethost.lib" />
-    <None Include="runtimes\win-x64\native\libnethost.lib" />
-    <None Include="runtimes\win-x64\native\nethost.lib" />
-    <None Include="runtimes\win-x86\native\libnethost.lib" />
-    <None Include="runtimes\win-x86\native\nethost.lib" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-  <Target Name="AfterBuild" Condition="'$(Configuration)'=='Debug'">
-    <ItemGroup>
-      <NETHOST Include="runtimes\win-$(LibrariesArchitecture)\native\nethost.dll" />
-    </ItemGroup>
-    <Copy SourceFiles="@(NETHOST)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
-  </Target>
 </Project>
