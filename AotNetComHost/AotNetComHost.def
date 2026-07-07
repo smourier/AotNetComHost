@@ -1,7 +1,8 @@
 EXPORTS
 
-DllRegisterServer	PRIVATE
-DllUnregisterServer	PRIVATE
-DllCanUnloadNow	    PRIVATE
-DllGetClassObject	PRIVATE
-DllInstall          PRIVATE
+DllRegisterServer			PRIVATE
+DllUnregisterServer			PRIVATE
+DllCanUnloadNow				PRIVATE
+DllGetClassObject			PRIVATE
+DllInstall					PRIVATE
+DllGetActivationFactory		PRIVATE

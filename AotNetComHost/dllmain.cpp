@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #pragma comment(lib, "pathcch.lib")
+#pragma comment(lib, "runtimeobject.lib")
 
 HMODULE _hModule = nullptr;
 HRESULT _loaded = 0xFFFFFFFF;
@@ -15,12 +16,14 @@ typedef HRESULT (CORECLR_DELEGATE_CALLTYPE* dll_unregister_server_fn)();
 typedef HRESULT (CORECLR_DELEGATE_CALLTYPE* dll_install_fn)(BOOL bInstall, LPCWSTR pszCmdLine);
 typedef HRESULT (CORECLR_DELEGATE_CALLTYPE* dll_can_unload_now_fn)();
 typedef HRESULT (CORECLR_DELEGATE_CALLTYPE* dll_get_class_object_fn)(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ LPVOID FAR* ppv);
+typedef HRESULT(CORECLR_DELEGATE_CALLTYPE* dll_get_activation_factory_fn)(_In_ HSTRING activatableClassId, _Out_ IActivationFactory** factory);
 
 dll_register_server_fn dll_register_server;
 dll_unregister_server_fn dll_unregister_server;
 dll_install_fn dll_install;
 dll_can_unload_now_fn dll_can_unload_now;
 dll_get_class_object_fn dll_get_class_object;
+dll_get_activation_factory_fn dll_get_activation_factory;
 
 // for communication between this and the .NET dll
 typedef HRESULT(CORECLR_DELEGATE_CALLTYPE* dll_thunk_init_fn)(LPCWSTR dllPath);
@@ -31,6 +34,13 @@ const static std::wstring GUID_ToStringW(const GUID& guid)
 	wchar_t name[64];
 	std::ignore = StringFromGUID2(guid, name, _countof(name));
 	return name;
+}
+
+const static std::wstring HSTRING_To_StringW(HSTRING value)
+{
+	UINT32 length = 0;
+	wchar_t const* buffer = WindowsGetStringRawBuffer(value, &length);
+	return std::wstring(buffer, length);
 }
 
 static HRESULT load_hostfxr()
@@ -160,13 +170,15 @@ static HRESULT load_hostfxr()
 	typeName += dotNetFileName;
 
 	WinTrace(L"typeName: '%s'", typeName.c_str());
+
+	// v1.1: DllCanUnloadNow is mandatory for us, the rest are optional (depends on WinRT vs COM hosting, etrc.)
 	if (FAILED((HRESULT)get_function_pointer(
 		typeName.c_str(),
-		L"DllRegisterServer",
+		L"DllCanUnloadNow",
 		UNMANAGEDCALLERSONLY_METHOD,
 		nullptr,
 		nullptr,
-		(void**)&dll_register_server)))
+		(void**)&dll_can_unload_now)))
 	{
 		// try <assemblyname>.Hosting.ComHosting, <assemblyname>
 		typeName = std::wstring(dotNetFileName);
@@ -176,15 +188,15 @@ static HRESULT load_hostfxr()
 		WinTrace(L"typeName: '%s'", typeName.c_str());
 		RETURN_IF_FAILED_MSG((HRESULT)get_function_pointer(
 			typeName.c_str(),
-			L"DllRegisterServer",
+			L"DllCanUnloadNow",
 			UNMANAGEDCALLERSONLY_METHOD,
 			nullptr,
 			nullptr,
-			(void**)&dll_register_server),
-			"DllRegisterServer is not exported or ComHosting type is not exposed as expected.");
+			(void**)&dll_can_unload_now),
+			"DllCanUnloadNow is not exported or ComHosting type is not exposed as expected.");
 	}
 
-	RETURN_IF_FAILED_MSG((HRESULT)get_function_pointer(
+	LOG_IF_FAILED_MSG((HRESULT)get_function_pointer(
 		typeName.c_str(),
 		L"DllUnregisterServer",
 		UNMANAGEDCALLERSONLY_METHOD,
@@ -193,16 +205,16 @@ static HRESULT load_hostfxr()
 		(void**)&dll_unregister_server),
 		"DllUnregisterServer is not exported.");
 
-	RETURN_IF_FAILED_MSG((HRESULT)get_function_pointer(
+	LOG_IF_FAILED_MSG((HRESULT)get_function_pointer(
 		typeName.c_str(),
-		L"DllCanUnloadNow",
+		L"DllRegisterServer",
 		UNMANAGEDCALLERSONLY_METHOD,
 		nullptr,
 		nullptr,
-		(void**)&dll_can_unload_now),
-		"DllCanUnloadNow is not exported.");
+		(void**)&dll_register_server),
+		"DllRegisterServer is not exported.");
 
-	RETURN_IF_FAILED_MSG((HRESULT)get_function_pointer(
+	LOG_IF_FAILED_MSG((HRESULT)get_function_pointer(
 		typeName.c_str(),
 		L"DllGetClassObject",
 		UNMANAGEDCALLERSONLY_METHOD,
@@ -211,24 +223,33 @@ static HRESULT load_hostfxr()
 		(void**)&dll_get_class_object),
 		"DllGetClassObject is not exported.");
 
-	// DllInstall is optional
-	(HRESULT)get_function_pointer(
+	LOG_IF_FAILED_MSG((HRESULT)get_function_pointer(
 		typeName.c_str(),
 		L"DllInstall",
 		UNMANAGEDCALLERSONLY_METHOD,
 		nullptr,
 		nullptr,
-		(void**)&dll_install);
+		(void**)&dll_install),
+		"DllInstall is not exported.");
 
-	// DllThunkInit is optional
-	(HRESULT)get_function_pointer(
+	LOG_IF_FAILED_MSG((HRESULT)get_function_pointer(
 		typeName.c_str(),
 		L"DllThunkInit",
 		UNMANAGEDCALLERSONLY_METHOD,
 		nullptr,
 		nullptr,
-		(void**)&dll_thunk_init);
-	
+		(void**)&dll_thunk_init),
+		"DllThunkInit is not exported.");
+
+	LOG_IF_FAILED_MSG((HRESULT)get_function_pointer(
+		typeName.c_str(),
+		L"DllGetActivationFactory",
+		UNMANAGEDCALLERSONLY_METHOD,
+		nullptr,
+		nullptr,
+		(void**)&dll_get_activation_factory),
+		"DllGetActivationFactory is not exported.");
+
 	if (dll_thunk_init)
 	{
 		RETURN_IF_FAILED(dll_thunk_init(wil::GetModuleFileNameW(_hModule).get()));
@@ -279,6 +300,12 @@ STDAPI DllRegisterServer()
 	std::wstring exePath = wil::GetModuleFileNameW(_hModule).get();
 	WinTrace(L"DllRegisterServer '%s'", exePath.c_str());
 	RETURN_IF_FAILED(ensure_load_hostfxr());
+	if (!dll_register_server)
+	{
+		WinTrace(L"DllRegisterServer is not exported.");
+		RETURN_IF_FAILED(E_NOTIMPL);
+	}
+
 	RETURN_IF_FAILED(dll_register_server());
 	return S_OK;
 }
@@ -288,6 +315,12 @@ STDAPI DllUnregisterServer()
 	std::wstring exePath = wil::GetModuleFileNameW(_hModule).get();
 	WinTrace(L"DllUnregisterServer '%s'", exePath.c_str());
 	RETURN_IF_FAILED(ensure_load_hostfxr());
+	if (!dll_unregister_server)
+	{
+		WinTrace(L"DllUnregisterServer is not exported.");
+		RETURN_IF_FAILED(E_NOTIMPL);
+	}
+
 	RETURN_IF_FAILED(dll_unregister_server());
 	return S_OK;
 }
@@ -298,6 +331,12 @@ STDAPI DllCanUnloadNow()
 	std::wstring exePath = wil::GetModuleFileNameW(_hModule).get();
 	WINTRACE(L"DllCanUnloadNow '%s'", exePath.c_str());
 	RETURN_IF_FAILED(ensure_load_hostfxr());
+	if (!dll_can_unload_now)
+	{
+		WinTrace(L"DllCanUnloadNow is not exported.");
+		RETURN_IF_FAILED(E_NOTIMPL);
+	}
+
 	RETURN_IF_FAILED(dll_can_unload_now());
 	return S_OK;
 }
@@ -310,6 +349,12 @@ STDAPI DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ LPVOID
 	RETURN_HR_IF_NULL(E_POINTER, ppv);
 	*ppv = nullptr;
 	RETURN_IF_FAILED(ensure_load_hostfxr());
+	if (!dll_get_class_object)
+	{
+		WinTrace(L"DllGetClassObject is not exported.");
+		RETURN_IF_FAILED(E_NOTIMPL);
+	}
+
 	RETURN_IF_FAILED_MSG(dll_get_class_object(rclsid, riid, ppv), "DllGetClassObject '%s' rclsid:%s riid:%s", exePath.c_str(), GUID_ToStringW(rclsid).c_str(), GUID_ToStringW(riid).c_str());
 	return S_OK;
 }
@@ -324,6 +369,24 @@ STDAPI DllInstall(BOOL bInstall, LPCWSTR pszCmdLine)
 		WinTrace(L"DllInstall is not exported.");
 		RETURN_IF_FAILED(E_NOTIMPL);
 	}
+	
 	RETURN_IF_FAILED(dll_install(bInstall, pszCmdLine));
+	return S_OK;
+}
+
+STDAPI DllGetActivationFactory(HSTRING activatableClassId, _Out_ IActivationFactory** factory)
+{
+	std::wstring exePath = wil::GetModuleFileNameW(_hModule).get();
+	WINTRACE(L"DllGetActivationFactory '%s' activatableClassId:%s", exePath.c_str(), HSTRING_To_StringW(activatableClassId).c_str());
+	RETURN_HR_IF_NULL(E_POINTER, factory);
+	*factory = nullptr;
+	RETURN_IF_FAILED(ensure_load_hostfxr());
+	if (!dll_get_activation_factory)
+	{
+		WinTrace(L"DllGetActivationFactory is not exported.");
+		RETURN_IF_FAILED(E_NOTIMPL);
+	}
+
+	RETURN_IF_FAILED_MSG(dll_get_activation_factory(activatableClassId, factory), "DllGetActivationFactory '%s' activatableClassId:%s", exePath.c_str(), HSTRING_To_StringW(activatableClassId).c_str());
 	return S_OK;
 }
